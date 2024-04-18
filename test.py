@@ -28,21 +28,27 @@ def perspective(fovy, aspect, near, far):
     return frustum(-halfWidth, halfWidth, -halfHeight, halfHeight, near, far)
 
 
-def ortographic_projection(fovy, aspect, near, far):
-    halfHeight = np.tan(np.pi * fovy / 360) * near
-    halfWidth = halfHeight * aspect
-    return frustum_ortographic(-halfWidth, halfWidth, -halfHeight, halfHeight, near, far)
-
-def frustum_ortographic(left, right, bottom, top, near, far):
+def ortho(left, right, bottom, top, near, far):
     r_l = right - left
     t_b = top - bottom
     f_n = far - near
     return np.array([
-        [ 2 / r_l, 0, 0, -(right+left)/r_l],
-        [ 0, 2/t_b, 0, -(top+bottom)/t_b],
-        [ 0, 0, -2/f_n, -(far+near)/f_n],
-        [ 0, 0, 0, 1]], 
-        dtype = np.float32)
+        [ 2 / r_l,
+        0,
+        0,
+        -(right + left) / r_l],
+        [ 0,
+        2 / t_b,
+        0,
+        -(top + bottom) / t_b],
+        [ 0,
+        0,
+        -2 / f_n,
+        -(far + near) / f_n],
+        [ 0,
+        0,
+        0,
+        1]], dtype = np.float32)
 #Que tan cerca del objeto
 def lookAt(eye, at, up):
 
@@ -217,7 +223,7 @@ if __name__ == "__main__":
 
         if(controller.view == ORTOGRAPHIC_PROYECTION):
             #fovy, aspect, near, far
-            matrix_projection = ortographic_projection(45, window.width/window.height, 0.001, 100)
+            matrix_projection = ortho(0, 100, 0, 100, 0, 100)
         else:
             matrix_projection = perspective(45, window.width/window.height, 0.001, 100)
 

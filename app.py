@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     #Acciones al presionar teclas
     @window.event
-    def on_key_press(symbol):
+    def on_key_press(symbol, modifier):
         if(key.C == symbol):
             controller.change_view()
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         #Definimos la vista en la que se encuentra el pipeline
         if(controller.view == ORTOGRAPHIC_PROYECTION):
             #fovy, aspect, near, far
-            matrix_projection = ortho()
+            matrix_projection = ortho(0, 100, 0, 100, 0, 100)
         else:
             matrix_projection = perspective(45, window.width/window.height, 0.001, 100)
 
