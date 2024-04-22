@@ -7,6 +7,8 @@ from pathlib import Path
 from time import time
 from pyglet.window import key
 
+import aux_functions.transformations as tr
+
 def frustum(left, right, bottom, top, near, far):
     r_l = right - left
     t_b = top - bottom
@@ -78,6 +80,7 @@ def rotationX(theta):
 
 class Controller:
     def __init__(self):
+        self.view = 0
         self.scaleZ = 1
         self.currentColor = 0
         self.colors = [
@@ -105,6 +108,8 @@ class Controller:
         self.y -= 0.2
     def moveRight(self):
         self.y += 0.2
+    def change_view(self):
+        self.view+=1
 
 
 if __name__ == "__main__":
@@ -137,7 +142,7 @@ if __name__ == "__main__":
         if(key.ENTER ==  symbol):
             controller.changeColor()
         if(key.SPACE == symbol):
-            controller.startRotation()
+            controller.change_view()
     @window.event
     def on_key_release(symbol, modifier):
         # print(symbol)
@@ -243,7 +248,13 @@ if __name__ == "__main__":
             np.array([0, 0, 0]), 
             np.array([0, 0, 1])
         ).reshape(16, 1, order='F')
-        pipeline['projection'] = perspective(45, window.width/window.height, 0.001, 100).reshape(16, 1, order='F')
+        if(controller.view == 0):
+            proyection = perspective(45, window.width/window.height, 0.001, 100).reshape(16, 1, order='F')
+            #pipeline['projection'] = perspective(45, window.width/window.height, 0.001, 100).reshape(16, 1, order='F')
+        if(controller.view == 1):
+            proyection =  tr.ortho(-1, 1, -1, 1, 0.001, 100).reshape(16, 1, order='F')
+            #pipeline['projection'] = tr.ortho(-1, 1, -1, 1, 0.001, 100).reshape(16, 1, order='F')
+        pipeline['projection'] = proyection
         pipeline['color'] = controller.getColor()
         bunny_gpu.draw(pyglet.gl.GL_TRIANGLES)
         # 
