@@ -22,7 +22,7 @@ frag_shader = pyglet.graphics.shader.Shader(fragment_source_code, "fragment")
 # init_scale: escala inicial a la que sera renderizado
 class Object_Static:
     def __init__(self, obj, init_scale):
-        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets"/obj)
+        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj"/obj)
         self._obj.apply_translation(-self._obj.centroid)
         self._obj.apply_scale(init_scale /  self._obj.scale)
         self._pipeline = pyglet.graphics.shader.ShaderProgram(vert_shader, frag_shader)
@@ -52,7 +52,7 @@ class Object_Static:
 class Flipper:
     def __init__(self):
         #Cargar Modelo
-        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets/flipper.obj")
+        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj/flipper.obj")
         self._obj.apply_translation(-self._obj.centroid)
         self._obj.apply_scale(1.0/  self._obj.scale)
         self._pipeline = pyglet.graphics.shader.ShaderProgram(vert_shader, frag_shader)
