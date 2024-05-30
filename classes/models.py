@@ -40,20 +40,20 @@ class Object_Static:
         return self._gpu
     
     def set_pipeline(self, projection, camera_view, translate, rotation, scale, color):
-        self._pipeline['translate'] = translate.reshape(16, 1, order='F')
         self._pipeline['rotation'] = rotation.reshape(16, 1, order='F')
+        self._pipeline['translate'] = translate.reshape(16, 1, order='F')
         self._pipeline['scale'] = scale.reshape(16, 1, order='F')
         self._pipeline['view'] = camera_view
         self._pipeline['projection'] = projection
         self._pipeline['color'] = color
 
     
-
+#Se cambio objeto
 class Flipper:
     def __init__(self):
         #Cargar Modelo
-        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj/flipper.obj")
-        self._obj.apply_translation(-self._obj.centroid)
+        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj/flipper_2.obj")
+        #self._obj.apply_translation(-self._obj.centroid)
         self._obj.apply_scale(1.0/  self._obj.scale)
         self._pipeline = pyglet.graphics.shader.ShaderProgram(vert_shader, frag_shader)
         self._vertex_list = tm.rendering.mesh_to_vertexlist(self._obj)

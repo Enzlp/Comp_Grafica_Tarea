@@ -29,8 +29,6 @@ if __name__ == "__main__":
         # print(symbol)
         if(key.C == symbol):
             controller.change_view()
-        if(key.SPACE == symbol):
-            controller.change_view()
 
     #Usamos la clase objeto para crear los objetos a graficar
     #Generamos el tablero
@@ -51,6 +49,10 @@ if __name__ == "__main__":
 
     #creamnos el segundo flipper flipper_2
     flipper_2 = Flipper()
+
+    #Objeto decorativo: nave espacial
+    spaceship_1 = Object_Static("RocketShip.obj",1.0)
+    spaceship_2 = Object_Static("RocketShip.obj",1.0)
 
     # GAME LOOP
     @window.event
@@ -124,18 +126,40 @@ if __name__ == "__main__":
         bumper_2_pipeline.use()
         bumper_2_gpu.draw(GL.GL_TRIANGLES)
 
+        #Dibujamos la nave espacial 1
+        GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
+        spaceship_rotation = tr.rotationX(0) 
+        spaceship_translate =  tr.translate(-2.5,-1.5,0)
+        spaceship_scale = tr.scale(0.8,0.8,0.8)
+        spaceship_color = [1, 1, 1]
+        spaceship_1.set_pipeline(projection, camera_view, spaceship_translate, spaceship_rotation, spaceship_scale, spaceship_color)
+        spaceship_1_pipeline = spaceship_1.pipeline()
+        spaceship_1_gpu = spaceship_1.gpu()
+        spaceship_1_pipeline.use()
+        spaceship_1_gpu.draw(GL.GL_TRIANGLES)
+
+        #Dibujamos la nave espacial 2
+        GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
+        spaceship_rotation = tr.rotationX(0) 
+        spaceship_translate =  tr.translate(-1.5,-2.5,0)
+        spaceship_scale = tr.scale(0.8,0.8,0.8)
+        spaceship_color = [1, 1, 1]
+        spaceship_2.set_pipeline(projection, camera_view, spaceship_translate, spaceship_rotation, spaceship_scale, spaceship_color)
+        spaceship_2_pipeline = spaceship_2.pipeline()
+        spaceship_2_gpu =spaceship_2.gpu()
+        spaceship_2_pipeline.use()
+        spaceship_2_gpu.draw(GL.GL_TRIANGLES)
+
         #Dibujamos el primer flipper
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
         flipper_1_pipeline = flipper_1.pipeline()
         flipper_1_gpu = flipper_1.gpu()
         flipper_1_pipeline.use()
         flipper_1_gpu.draw(GL.GL_TRIANGLES)
-
         matrix_rotation = tr.rotationX(np.pi/2)
         flipper_1_pipeline['scale'] = tr.scale(0.4,0.4,0.4).reshape(16, 1, order='F')
         flipper_1_pipeline['rotation'] = matrix_rotation.reshape(16, 1, order='F')
         flipper_1_pipeline['translate'] = tr.translate(2.5, 0, -3).reshape(16, 1, order='F')
-
         flipper_1_pipeline['view'] = camera_view
         flipper_1_pipeline['projection'] = projection
         flipper_1_pipeline['color'] = [0.5, 1, 0.5]
@@ -146,7 +170,6 @@ if __name__ == "__main__":
         flipper_2_gpu = flipper_2.gpu()
         flipper_2_pipeline.use()
         flipper_2_gpu.draw(GL.GL_TRIANGLES)
-
         matrix_rotation = tr.rotationX(np.pi/2) @ tr.rotationY(np.pi/1.6)
         flipper_2_pipeline['scale'] = tr.scale(0.4,0.4,0.4).reshape(16, 1, order='F')
         flipper_2_pipeline['rotation'] = matrix_rotation.reshape(16, 1, order='F')
