@@ -1,4 +1,4 @@
-#Clase de controlador
+#Clase de controlador Global
 class Controller:
     def __init__(self):
         self.view = 0

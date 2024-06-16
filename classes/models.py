@@ -52,7 +52,7 @@ class Object_Static:
 class Flipper:
     def __init__(self):
         #Cargar Modelo
-        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj/flipper_2.obj")
+        self._obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj/flipper_3.obj")
         #self._obj.apply_translation(-self._obj.centroid)
         self._obj.apply_scale(1.0/  self._obj.scale)
         self._pipeline = pyglet.graphics.shader.ShaderProgram(vert_shader, frag_shader)
@@ -63,15 +63,24 @@ class Flipper:
             self._vertex_list[3]
         )
         self._gpu.position[:] = self._vertex_list[4][1]
-        #Atributos 
-        self.x = 0
-        self.z = 0
-        self.y = 0
-        self.t = 0
-
     def pipeline(self):
         return self._pipeline
     def gpu(self):
         return self._gpu
-    def activate(self):
-        pass
+
+class Pelota:
+    def __init__(self) -> None:
+        self.obj = tm.load(Path(os.path.dirname(__file__)).parent.absolute() /"assets_obj/sphere.off")
+        self.obj.apply_scale(1.0/  self.obj.scale)
+        self._pipeline = pyglet.graphics.shader.ShaderProgram(vert_shader, frag_shader)
+        self._vertex_list = tm.rendering.mesh_to_vertexlist(self.obj)
+        self._gpu = self._pipeline.vertex_list_indexed(
+            len(self._vertex_list[4][1]) // 3,
+            GL.GL_TRIANGLES,
+            self._vertex_list[3]
+        )
+        self._gpu.position[:] = self._vertex_list[4][1]
+    def pipeline(self):
+        return self._pipeline
+    def gpu(self):
+        return self._gpu

@@ -1,4 +1,3 @@
-
 import trimesh as tm
 import os
 import sys
@@ -31,28 +30,19 @@ if __name__ == "__main__":
             controller.change_view()
 
     #Usamos la clase objeto para crear los objetos a graficar
-    #Generamos el tablero
+    #Generamos los objetos estaticos
     tablero = Object_Static("superficie.obj",2.0)
-
-    #Generamos las paredes
     paredes = Object_Static("paredes.obj",2.0)
-
-    #Generamos los obstaculos en el tablero
-    #Creamos el Primer Bumper
     bumper_1 = Object_Static("bumper.obj",1.0)
-
-    #Segundo Bumper
     bumper_2 = Object_Static("bumper.obj",1.0)
-
-    #Creamos el primer flipper flipper_1
-    flipper_1 = Flipper()
-
-    #creamnos el segundo flipper flipper_2
-    flipper_2 = Flipper()
-
-    #Objeto decorativo: nave espacial
     spaceship_1 = Object_Static("RocketShip.obj",1.0)
     spaceship_2 = Object_Static("RocketShip.obj",1.0)
+
+    #Creamos los objetos dinamicos
+    flipper_1 = Flipper()
+    flipper_2 = Flipper()
+    pelota = Pelota()
+
 
     # GAME LOOP
     @window.event
@@ -64,13 +54,13 @@ if __name__ == "__main__":
         if(controller.view == PERSPECTIVE_VIEW):
             projection = tr.perspective(45, window.width/window.height, 0.001, 100).reshape(16, 1, order='F')
             camera_view = tr.lookAt(
-                np.array([3,3,3]),
+                np.array([4,0,3]),
                 np.array([0, 0, 0]), 
                 np.array([0, 0, 1])
             ).reshape(16, 1, order='F')
         if(controller.view == ORTOGRAPHIC_VIEW): 
             camera_view = tr.lookAt(
-                np.array([3,3,3]),
+                np.array([4,0,3]),
                 np.array([0, 0, 0]), 
                 np.array([0, 0, 1])
             ).reshape(16, 1, order='F')
@@ -79,7 +69,7 @@ if __name__ == "__main__":
         #Dibujamos el tablero
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
         tablero_translate = tr.translate(0, 0, 0)
-        tablero_rotation = tr.rotationX(np.pi/2) @ tr.rotationY(np.pi/4)
+        tablero_rotation = tr.rotationX(np.pi/2) 
         tablero_scale = tr.scale(2, 2, 2)
         tablero_color = [0.5, 0.5, 1]
         tablero.set_pipeline(projection, camera_view, tablero_translate, tablero_rotation, tablero_scale, tablero_color)
@@ -90,8 +80,8 @@ if __name__ == "__main__":
 
         #Dibujamos las paredes
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
-        paredes_translate = tr.translate(-0.145, 0, -0.08)
-        paredes_rotation = tr.rotationX(np.pi/2) @ tr.rotationY(np.pi/4)
+        paredes_translate = tr.translate(-0.14, 0, -0.08)
+        paredes_rotation = tr.rotationX(np.pi/2)
         paredes_scale = tr.scale(2.1, 2.1, 2.1)
         paredes_color = [0.5, 0.5, 0.5]
         paredes.set_pipeline(projection, camera_view, paredes_translate, paredes_rotation, paredes_scale, paredes_color)
@@ -105,7 +95,7 @@ if __name__ == "__main__":
         #Dibujamos el primer bumper
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
         bumper_1_translate =  tr.translate(-1.5, 0, 1)
-        bumper_1_rotation = tr.rotationX(np.pi/2) @ tr.rotationY(np.pi/4)
+        bumper_1_rotation = tr.rotationX(np.pi/2) 
         bumper_1_scale = tr.scale(0.4,0.4,0.4)
         bumper_1_color = [1, 1, 0.5]
         bumper_1.set_pipeline(projection, camera_view, bumper_1_translate, bumper_1_rotation, bumper_1_scale, bumper_1_color)
@@ -117,7 +107,7 @@ if __name__ == "__main__":
         #Dibujamos el segundo bumper
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
         bumper_2_translate =  tr.translate(1.5, 0, -0.5)
-        bumper_2_rotation = tr.rotationX(np.pi/2) @ tr.rotationY(np.pi/4)
+        bumper_2_rotation = tr.rotationX(np.pi/2) 
         bumper_2_scale = tr.scale(0.4,0.4,0.4)
         bumper_2_color = [1, 1, 0.5]
         bumper_2.set_pipeline(projection, camera_view, bumper_2_translate, bumper_2_rotation, bumper_2_scale, bumper_2_color)
@@ -129,9 +119,9 @@ if __name__ == "__main__":
         #Dibujamos la nave espacial 1
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
         spaceship_rotation = tr.rotationX(0) 
-        spaceship_translate =  tr.translate(-2.5,-1.5,0)
+        spaceship_translate =  tr.translate(-2.8,1,0)
         spaceship_scale = tr.scale(0.8,0.8,0.8)
-        spaceship_color = [1, 1, 1]
+        spaceship_color = [0.2,0.2,0.2]
         spaceship_1.set_pipeline(projection, camera_view, spaceship_translate, spaceship_rotation, spaceship_scale, spaceship_color)
         spaceship_1_pipeline = spaceship_1.pipeline()
         spaceship_1_gpu = spaceship_1.gpu()
@@ -141,9 +131,9 @@ if __name__ == "__main__":
         #Dibujamos la nave espacial 2
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
         spaceship_rotation = tr.rotationX(0) 
-        spaceship_translate =  tr.translate(-1.5,-2.5,0)
+        spaceship_translate =  tr.translate(-2.8,-1,0)
         spaceship_scale = tr.scale(0.8,0.8,0.8)
-        spaceship_color = [1, 1, 1]
+        spaceship_color = [0.2,0.2,0.2]
         spaceship_2.set_pipeline(projection, camera_view, spaceship_translate, spaceship_rotation, spaceship_scale, spaceship_color)
         spaceship_2_pipeline = spaceship_2.pipeline()
         spaceship_2_gpu =spaceship_2.gpu()
@@ -156,10 +146,10 @@ if __name__ == "__main__":
         flipper_1_gpu = flipper_1.gpu()
         flipper_1_pipeline.use()
         flipper_1_gpu.draw(GL.GL_TRIANGLES)
-        matrix_rotation = tr.rotationX(np.pi/2)
+        matrix_rotation = tr.rotationX(np.pi/2) #@ tr.rotationY(-np.pi/4)
         flipper_1_pipeline['scale'] = tr.scale(0.4,0.4,0.4).reshape(16, 1, order='F')
         flipper_1_pipeline['rotation'] = matrix_rotation.reshape(16, 1, order='F')
-        flipper_1_pipeline['translate'] = tr.translate(2.5, 0, -3).reshape(16, 1, order='F')
+        flipper_1_pipeline['translate'] = tr.translate(4, 0, 1).reshape(16, 1, order='F')
         flipper_1_pipeline['view'] = camera_view
         flipper_1_pipeline['projection'] = projection
         flipper_1_pipeline['color'] = [0.5, 1, 0.5]
@@ -170,13 +160,27 @@ if __name__ == "__main__":
         flipper_2_gpu = flipper_2.gpu()
         flipper_2_pipeline.use()
         flipper_2_gpu.draw(GL.GL_TRIANGLES)
-        matrix_rotation = tr.rotationX(np.pi/2) @ tr.rotationY(np.pi/1.6)
+        matrix_rotation = tr.rotationX(np.pi/2)# @ tr.rotationY(np.pi/4)
         flipper_2_pipeline['scale'] = tr.scale(0.4,0.4,0.4).reshape(16, 1, order='F')
         flipper_2_pipeline['rotation'] = matrix_rotation.reshape(16, 1, order='F')
-        flipper_2_pipeline['translate'] = tr.translate(0.4,0,4).reshape(16, 1, order='F')
+        flipper_2_pipeline['translate'] = tr.translate(4,0,-0.5).reshape(16, 1, order='F')
         flipper_2_pipeline['view'] = camera_view
         flipper_2_pipeline['projection'] = projection
         flipper_2_pipeline['color'] = [0.5, 1, 0.5]
+
+        #Pelota
+        GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
+        pelota_pipeline = pelota.pipeline()
+        pelota_gpu = pelota.gpu()
+        pelota_pipeline.use()
+        pelota_gpu.draw(GL.GL_TRIANGLES)
+        pelota_matrix_rotation = tr.rotationX(0)# @ tr.rotationY(np.pi/4)
+        pelota_pipeline['scale'] = tr.scale(0.4,0.4,0.4).reshape(16, 1, order='F')
+        pelota_pipeline['rotation'] = pelota_matrix_rotation.reshape(16, 1, order='F')
+        pelota_pipeline['translate'] = tr.translate(3.2,1.9,0).reshape(16, 1, order='F')
+        pelota_pipeline['view'] = camera_view
+        pelota_pipeline['projection'] = projection
+        pelota_pipeline['color'] = [1, 1, 1]
 
     # aquí comienza pyglet a ejecutar su loop.
     pyglet.app.run()
