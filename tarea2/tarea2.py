@@ -8,10 +8,11 @@ import pyglet.gl as GL
 import trimesh as tm
 from pyglet.window import key
 
-#Import clases propias
+#Import clases 
 import aux_functions.transformations as tr
 from classes.controller import *
-from classes.models import *
+from grafica.utils import load_pipeline
+
 
 PERSPECTIVE_VIEW = 0
 ORTOGRAPHIC_VIEW = 1
@@ -25,33 +26,11 @@ if __name__ == "__main__":
 
     controller = Controller()
 
-    @window.event
-    def on_key_press(symbol, modifier):
-        # print(symbol)
-        if(key.C == symbol):
-            controller.change_view()
-        if(key.A == symbol):
-            controller.start_left_flipper()
-        if(key.D == symbol):
-            controller.start_right_flipper()
-    @window.event
-    def on_key_release(symbol, modifier):
-        if(key.A == symbol):
-            controller.stop_left_flipper()
-        if(key.D == symbol):
-            controller.stop_right_flipper()
-
-    #Usamos la clase objeto para crear los objetos a graficar
-    #Generamos los objetos estaticos
-    with open(Path(os.path.dirname(__file__)) /"vertex_program.glsl") as f:
-        vertex_source_code = f.read()
-
-    with open(Path(os.path.dirname(__file__)) / "fragment_program.glsl") as f:
-        fragment_source_code = f.read()
-
-    vert_shader = pyglet.graphics.shader.Shader(vertex_source_code, "vertex")
-    frag_shader = pyglet.graphics.shader.Shader(fragment_source_code, "fragment")
-    pipeline = pyglet.graphics.shader.ShaderProgram(vert_shader, frag_shader)
+    #Generamos los pipelines para los objetos
+    pipeline = load_pipeline(
+        Path(os.path.dirname(__file__)) / "vertex_program.glsl",
+        Path(os.path.dirname(__file__)) / "fragment_program.glsl",
+    )
 
     # Tablero
     tablero_obj = tm.load(Path(os.path.dirname(__file__)) /"assets_obj/superficie.obj")
@@ -140,6 +119,23 @@ if __name__ == "__main__":
         pelota_vertex_list[3]
     )
     pelota_gpu.position[:] = pelota_vertex_list[4][1]
+
+    
+    @window.event
+    def on_key_press(symbol, modifier):
+        # print(symbol)
+        if(key.C == symbol):
+            controller.change_view()
+        if(key.A == symbol):
+            controller.start_left_flipper()
+        if(key.D == symbol):
+            controller.start_right_flipper()
+    @window.event
+    def on_key_release(symbol, modifier):
+        if(key.A == symbol):
+            controller.stop_left_flipper()
+        if(key.D == symbol):
+            controller.stop_right_flipper()
 
     # GAME LOOP
     @window.event
