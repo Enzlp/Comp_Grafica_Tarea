@@ -32,11 +32,11 @@ if __name__ == "__main__":
         Path(os.path.dirname(__file__)) / "fragment_program.glsl",
     )
 
-
+    #Grafica
     # Tablero
     tablero_obj = tm.load(Path(os.path.dirname(__file__)) /"assets_obj/superficie_copy.obj")
     tablero_obj.apply_translation(-tablero_obj.centroid)
-    tablero_obj.apply_scale(2.0 /  tablero_obj.scale)
+    tablero_obj.apply_scale(1.0 /  tablero_obj.scale)
     tablero_vertex_list = tm.rendering.mesh_to_vertexlist(tablero_obj)
     tablero_gpu = pipeline.vertex_list_indexed(
         len(tablero_vertex_list[4][1]) // 3,
@@ -128,16 +128,46 @@ if __name__ == "__main__":
     )
     pelota_gpu.position[:] = pelota_vertex_list[4][1]
 
+    #Fisica
+    import pymunk
+
+    space = pymunk.Space()
+    space.gravity = (20.0, 0.0)  # Gravity Direction
+
+    #Paredes
+    static_lines = [
+        pymunk.Segment(space.static_body, (-10, 3.5), (10, 3.5), 1.0),  # Inverted y positions
+        pymunk.Segment(space.static_body, (-10, -3.5), (10, -3.5), 1.0),  # Inverted y positions
+        pymunk.Segment(space.static_body, (-6, -10), (-6,10), 1.0),
+    ]
+    for line in static_lines:
+        line.elasticity = 0.7
+        line.group = 1
+    space.add(*static_lines)
+    
+    #Pelota
+    balls = []
     
     @window.event
     def on_key_press(symbol, modifier):
         # print(symbol)
         if(key.C == symbol):
             controller.change_view()
-        if(key.A == symbol):
+        elif(key.A == symbol):
             controller.start_left_flipper()
-        if(key.D == symbol):
+        elif(key.D == symbol):
             controller.start_right_flipper()
+        elif(key.SPACE == symbol):
+            mass = 1
+            radius = 0.5
+            inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
+            body = pymunk.Body(mass, inertia)
+            body.position = 0,0  # Inverted y position
+            shape = pymunk.Circle(body, radius, (0, 0))
+            shape.elasticity = 0.95
+            space.add(body, shape)
+            balls.append(shape)
+            
     @window.event
     def on_key_release(symbol, modifier):
         if(key.A == symbol):
@@ -171,7 +201,7 @@ if __name__ == "__main__":
 
         #Al hacer transformaciones es de la ultima matriz a la primera
         #Dibujamos el tablero
-        trans_tablero = [tr.translate(0, 0, 0),tr.scale(2, 2, 2)]
+        trans_tablero = [tr.translate(0, 0, 0),tr.uniformScale(4)]
         pipeline['transform'] = tr.matmul(trans_tablero).reshape(16, 1, order='F')
         pipeline['view'] = camera_view
         pipeline['projection'] = projection
@@ -198,10 +228,15 @@ if __name__ == "__main__":
 
         #Dibujamos las piezas moviles
         #Pelota
-        tr_pelota = [tr.scale(0.4,0.4,0.4),tr.translate(-3,0,0)]
-        pipeline['transform'] = tr.matmul(tr_pelota).reshape(16, 1, order='F')
-        pipeline['color'] = [0.5,0.5,0.5]
-        pelota_gpu.draw(GL.GL_TRIANGLES)
+        for ball in balls:    
+            dx,dy = 0,0
+            dx,dy = ball.body.position
+            if(dx<-6):
+                pyglet.app.exit()
+            tr_pelota = [tr.scale(0.4,0.4,0.4),tr.translate(dx,dy,0)]
+            pipeline['transform'] = tr.matmul(tr_pelota).reshape(16, 1, order='F')
+            pipeline['color'] = [0.5,0.5,0.5]
+            pelota_gpu.draw(GL.GL_TRIANGLES)
 
         #Movimiento paletas
         if(controller.right_flipper_rotating):
@@ -219,14 +254,16 @@ if __name__ == "__main__":
                 controller.alpha_2 -= 0.3
                 
         #Flipper
-        tr_flipper_1 = [tr.translate(1.5, 0.8,0),tr.rotationZ(-np.pi/2+controller.alpha_1),tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
+        tr_flipper_1 = [tr.translate(1.6, 0.8,0),tr.rotationZ(-np.pi/2+controller.alpha_1),tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
         pipeline['transform'] = tr.matmul(tr_flipper_1).reshape(16, 1, order='F')
         pipeline['color'] = [0.5, 1, 0.5]
         flipper_gpu.draw(GL.GL_TRIANGLES)
-        tr_flipper_2 = [tr.translate(1.5, -0.8,0),tr.rotationZ(np.pi/2+controller.alpha_2),tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
+        tr_flipper_2 = [tr.translate(1.6, -0.8,0),tr.rotationZ(np.pi/2+controller.alpha_2),tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
         pipeline['transform'] = tr.matmul(tr_flipper_2).reshape(16, 1, order='F')
         flipper2_gpu.draw(GL.GL_TRIANGLES)
         
-
     # aquí comienza pyglet a ejecutar su loop.
+    def update(dt):
+        space.step(dt)
+    pyglet.clock.schedule_interval(update, 1 / 360.0)
     pyglet.app.run()
