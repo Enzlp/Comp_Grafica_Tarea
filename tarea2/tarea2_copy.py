@@ -12,6 +12,7 @@ from pyglet.window import key
 import aux_functions.transformations as tr
 from classes.controller import *
 from grafica.utils import load_pipeline
+from grafica.lighting_shaders import SimplePhongShaderProgram
 
 
 PERSPECTIVE_VIEW = 0
@@ -31,6 +32,7 @@ if __name__ == "__main__":
         Path(os.path.dirname(__file__)) / "vertex_program.glsl",
         Path(os.path.dirname(__file__)) / "fragment_program.glsl",
     )
+
 
     #Grafica
     # Tablero
@@ -130,21 +132,33 @@ if __name__ == "__main__":
 
     #Fisica
     import pymunk
-
+    import random
     space = pymunk.Space()
-    space.gravity = (20.0, 0.0)  # Gravity Direction
+    space.gravity = (10, 0.0)  # Gravity Direction
 
     #Paredes
     static_lines = [
-        pymunk.Segment(space.static_body, (-10, 3.5), (10, 3.5), 1.0),  # Inverted y positions
-        pymunk.Segment(space.static_body, (-10, -3.5), (10, -3.5), 1.0),  # Inverted y positions
-        pymunk.Segment(space.static_body, (-6, -10), (-6,10), 1.0),
+        pymunk.Segment(space.static_body, (-5, 3.5), (5, 3.5), 1.5),  # Inverted y positions
+        pymunk.Segment(space.static_body, (-5, -3.5), (5, -3.5), 1.5),  # Inverted y positions
+        pymunk.Segment(space.static_body, (-6, -10), (-6,10), 1.5),
     ]
     for line in static_lines:
         line.elasticity = 0.7
         line.group = 1
     space.add(*static_lines)
-    
+
+    #bumpers
+    for p in [(0, 0), (-2.6,1.2),(-2.6,-1.2)]:  
+        body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
+        body.position = p
+        shape = pymunk.Circle(body, 0.5)
+        shape.elasticity = 1.5
+        space.add(body, shape)
+
+    #Flippers
+    fp = [(0.5, 0.5), (-120, 0), (20, -20)]
+
+
     #Pelota
     balls = []
     
@@ -159,10 +173,11 @@ if __name__ == "__main__":
             controller.start_right_flipper()
         elif(key.SPACE == symbol):
             mass = 1
-            radius = 0.5
+            radius = 0.1
             inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
             body = pymunk.Body(mass, inertia)
-            body.position = 0,0  # Inverted y position
+            x = random.uniform(-2,2)
+            body.position = -3.5,x   # Inverted y position
             shape = pymunk.Circle(body, radius, (0, 0))
             shape.elasticity = 0.95
             space.add(body, shape)
@@ -180,6 +195,7 @@ if __name__ == "__main__":
     def on_draw():
         GL.glClearColor(0, 0, 0, 1.0)
         GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
+        GL.glEnable(GL.GL_DEPTH_TEST)
         window.clear()
         pipeline.use()
         
@@ -201,7 +217,7 @@ if __name__ == "__main__":
 
         #Al hacer transformaciones es de la ultima matriz a la primera
         #Dibujamos el tablero
-        trans_tablero = [tr.translate(0, 0, 0),tr.uniformScale(4)]
+        trans_tablero = [tr.translate(0, 0, -0.1),tr.uniformScale(4)]
         pipeline['transform'] = tr.matmul(trans_tablero).reshape(16, 1, order='F')
         pipeline['view'] = camera_view
         pipeline['projection'] = projection
@@ -209,20 +225,20 @@ if __name__ == "__main__":
         tablero_gpu.draw(GL.GL_TRIANGLES)
 
         #Dibujamos las paredes
-        tr_paredes = [tr.translate(-0.55,0,0), tr.scale(2.1, 2.1, 2.1), tr.rotationX(np.pi/2)]
+        tr_paredes = [tr.translate(-0.55,0,-0.1), tr.scale(2.1, 2.1, 2.1), tr.rotationX(np.pi/2)]
         pipeline['transform'] = tr.matmul(tr_paredes).reshape(16, 1, order='F')
         pipeline['color'] = [0.2,0.2,0.2]
         paredes_gpu.draw(GL.GL_TRIANGLES)
 
         #Dibujamos los bumpers
-        tr_bumper1 = [tr.scale(0.4,0.4,0.4),tr.translate(0,0,0), tr.rotationX(np.pi/2)]
+        tr_bumper1 = [tr.translate(0,0,0), tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
         pipeline['transform'] = tr.matmul(tr_bumper1).reshape(16, 1, order='F')
         pipeline['color'] = [1, 1, 0.5]
         bumper_gpu.draw(GL.GL_TRIANGLES)
-        tr_bumper2 = [tr.scale(0.4,0.4,0.4),tr.translate(-1.5,1,0), tr.rotationX(np.pi/2)]
+        tr_bumper2 = [tr.translate(-1,0.5,0), tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
         pipeline['transform'] = tr.matmul(tr_bumper2).reshape(16, 1, order='F')
         bumper2_gpu.draw(GL.GL_TRIANGLES)
-        tr_bumper3 = [tr.scale(0.4,0.4,0.4),tr.translate(-1.5,-1,0), tr.rotationX(np.pi/2)]
+        tr_bumper3 = [tr.translate(-1,-0.5,0), tr.rotationX(np.pi/2),tr.uniformScale(0.4)]
         pipeline['transform'] = tr.matmul(tr_bumper3).reshape(16, 1, order='F')
         bumper3_gpu.draw(GL.GL_TRIANGLES)
 
@@ -231,7 +247,7 @@ if __name__ == "__main__":
         for ball in balls:    
             dx,dy = 0,0
             dx,dy = ball.body.position
-            if(dx<-6):
+            if(dx>10):
                 pyglet.app.exit()
             tr_pelota = [tr.scale(0.4,0.4,0.4),tr.translate(dx,dy,0)]
             pipeline['transform'] = tr.matmul(tr_pelota).reshape(16, 1, order='F')
